@@ -13,8 +13,6 @@ public class testEx2 {
     private int index = 0;
 
     public void controlRobot(IRobot robot){
-        int x = robot.getLocation().x;
-        int y = robot.getLocation().y;
 
         // Resets RobotData information for new maze
         if ((robot.getRuns() == 0) && (pollRun == 0)) {
@@ -69,7 +67,7 @@ public class testEx2 {
             robotData.dirCounter++;
         } else {
             if ((robotData.kindOfSquare[robotData.squareCounter-1] == 3 || robotData.kindOfSquare[robotData.squareCounter-1] == 4) && robotData.getElem(0) == 0){
-                robotData.dirSaver(robotData.prevSquare(robot));
+                robotData.dirSaver(robot.getHeading());
                 robotData.dirCounter++;
                 direction = exploringDirection(robot,exits);
 
@@ -394,13 +392,6 @@ class RobotData {
     public void squareSaver(int square){
         kindOfSquare[squareCounter] = square;
         squareCounter++;
-    }
-    public int prevSquare(IRobot robot){
-        int result = 0;
-        if (kindOfSquare[squareCounter - 1] == 3 || kindOfSquare[squareCounter - 1] == 4){
-            result = robot.getHeading();
-        }
-        return result;
     }
     public int getElem(int i){
         return directions[arrayCounter][i];
