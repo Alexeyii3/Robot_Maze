@@ -175,7 +175,12 @@ public class testEx {
                 }
                 // Robot goes to exploration mode
                 explorerMode = 1;
-                robotData.dirCounter = 0;
+                if (robotData.directions[robotData.arrayCounter][0] != 0){
+                    robotData.arrayCounter++;
+                    robotData.dirCounter = 0;
+                } else {
+                    robotData.dirCounter = 0;
+                }
 
             } else {
                 // If there are no passages around, robot takes information about his heading when he arrived to this junction and then set opposite heading
@@ -379,7 +384,7 @@ class RobotData {
     public int[] kindOfJunc = new int [maxJunctions];
     public int[] kindOfSquare = new int [maxJunctions];
     public int[] passagesLocation = new int[maxJunctions];
-    public int[][] directions = new int[100][15];
+    public int[][] directions = new int[10][15];
     public int dirCounter = 0;
     public int squareCounter = 0;
     public int arrayCounter = 0;

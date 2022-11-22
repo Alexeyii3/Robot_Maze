@@ -10,7 +10,7 @@ public class testEx2 {
     private int pollRun = 0; // Incremented after each pass
     private RobotData robotData; // Data store for junctions
     private int explorerMode; // Identifies which controller should be called
-    private int index1 = 0;
+    private int index = 0;
 
     public void controlRobot(IRobot robot){
         int x = robot.getLocation().x;
@@ -34,202 +34,33 @@ public class testEx2 {
             }
         }
         if (pollRun == 0){
-            index1=0;
+            index=0;
             explorerMode = 1;
         }
 
         if (robot.getRuns()>0){
             robotData.getDir();
-            direction = robotData.finalDir[index1];
-            index1++;
-            System.out.println("direction= " + direction);
+            direction = robotData.finalDir[index];
+            index++;
             if (direction < 2000){
                 robot.setHeading(direction);
                 direction = IRobot.AHEAD;
             }
         }
 
-        System.out.println("junctionCounter: " + robotData.junctionCounter);
-        System.out.println("arrayCounter: " + robotData.arrayCounter);
         //print1(IRobot.AHEAD,IRobot.BEHIND,IRobot.LEFT,IRobot.RIGHT,IRobot.NORTH,IRobot.SOUTH,IRobot.EAST,IRobot.WEST);
         robot.face(direction);
         pollRun++; // Increases passes counter
     }
 
-    public void print1(int x, int y, int z, int m, int a, int b, int c, int d){
-        System.out.println("AHEAD: " + x);
-        System.out.println("BEHIND: " + y);
-        System.out.println("LEFT: " + z);
-        System.out.println("RIGHT: " + m);
-        System.out.println("NORTH: " + a);
-        System.out.println("SOUTH: " + b);
-        System.out.println("EAST: " + c);
-        System.out.println("WEST: " + d);
-        System.out.println(Arrays.deepToString(robotData.directions));
-        System.out.println("final dir: " + Arrays.toString(robotData.finalDir));
-        System.out.println("firststep: " + robotData.firstStep);
-        //System.out.println("index 1: " + index1);
-
-    }
-
-    // This controller is called when robot is in exploration mode
-//    private int exploreControl(IRobot robot){
-//        int x = robot.getLocation().x;
-//        int y = robot.getLocation().y;
-//        int exits = nonwallExits(robot);
-//        if (nonwallExits(robot) > 2) {
-//            robotData.recordJunction(robot.getHeading(), nonwallExits(robot));
-//            robotData.print();
-//            robotData.junctionCounter++;
-//        }
-//        int direction = 0;
-//
-//        // Saves robot's heading when it arrives at junction
-//        if(pollRun == 0){
-//            direction = deadEnd(robot);
-//            robotData.dirSaver(direction);
-//            robotData.dirCounter++;
-//        } else {
-//            if ((robotData.kindOfSquare[robotData.squareCounter-1] == 3 || robotData.kindOfSquare[robotData.squareCounter-1] == 4) && robotData.getElem(0) == 0){
-//                robotData.dirSaver(robotData.prevSquare(robot));
-//                robotData.dirCounter++;
-//                switch (exits) {
-//                    // Deadend case
-//                    case 1 -> {
-//                        explorerMode = 0;
-//                        direction = deadEnd(robot);
-//                        robotData.dirRemover();
-//                    }
-//                    // Corridor case
-//                    case 2 -> {
-//                        direction = corridor(robot);
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                    // Junction case
-//                    case 3 -> {
-//                        direction = junction(robot);
-//                        robotData.arrayCounter++;
-//                        robotData.dirCounter = 0;
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                    // Crossroad case
-//                    case 4 -> {
-//                        direction = crossroad(robot);
-//                        robotData.arrayCounter++;
-//                        robotData.dirCounter = 0;
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                }
-//
-//            } else {
-//                switch (exits) {
-//                    // Deadend case
-//                    case 1 -> {
-//                        explorerMode = 0;
-//                        direction = deadEnd(robot);
-//                        robotData.dirRemover();
-//                    }
-//                    // Corridor case
-//                    case 2 -> {
-//                        direction = corridor(robot);
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                    // Junction case
-//                    case 3 -> {
-//                        direction = junction(robot);
-//                        robotData.arrayCounter++;
-//                        robotData.dirCounter = 0;
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                    // Crossroad case
-//                    case 4 -> {
-//                        direction = crossroad(robot);
-//                        robotData.arrayCounter++;
-//                        robotData.dirCounter = 0;
-//                        robotData.dirSaver(direction);
-//                        robotData.dirCounter++;
-//                    }
-//                }
-//            }
-//        }
-//        if ((x ==1 && y == 2) || (x ==2 && y ==1 )){
-//            robotData.firstStep = robot.getHeading();
-//        }
-//        robotData.squareSaver(exits);
-//        // Direction is returned
-//        return direction;
-//    }
-//
-//    // This controller is called when robot is in backtracking mode
-//    private int backtrackControl(IRobot robot){
-//        int x = robot.getLocation().x;
-//        int y = robot.getLocation().y;
-//        int direction = 0;
-//        int exits = nonwallExits(robot);
-//        int passages = passageExits(robot);
-//
-//        // This statement identifies if robot is on junction or crossroad square
-//        if(exits > 2){
-//            // Identifies if there are any passages around
-//            if(passages > 0){
-//                // If there are, robot is controlled by "junction" or "crossroad" methods
-//                switch (exits){
-//                    case 3 -> direction = junction(robot);
-//                    case 4 -> direction = crossroad(robot);
-//                }
-//                // Robot goes to exploration mode
-//                explorerMode = 1;
-//                robotData.dirCounter = 0;
-//            } else {
-//                int heading = robotData.searchHeading();
-//                // If there are no passages around, robot takes information about his heading when he arrived to this junction and then set opposite heading
-//                switch (heading){
-//                    case IRobot.NORTH -> robot.setHeading(IRobot.SOUTH);
-//                    case IRobot.SOUTH -> robot.setHeading(IRobot.NORTH);
-//                    case IRobot.EAST -> robot.setHeading(IRobot.WEST);
-//                    case IRobot.WEST -> robot.setHeading(IRobot.EAST);
-//                }
-//                // then robot moves ahead
-//                direction = IRobot.AHEAD;
-//                robotData.arrayCounter--;
-//                robotData.dirRemover();
-//                robotData.removeElem();
-//            }
-//        } else {
-//            if (passageExits(robot) == 0) {
-//                switch (exits){
-//                    case 1 -> direction = deadEnd(robot);
-//                    case 2 -> direction = corridor(robot);
-//                }
-//            } else {
-//                direction = corridor(robot);
-//                robotData.dirSaver(direction);
-//                robotData.dirCounter++;
-//
-//            }
-//        }
-//        if ((x ==1 && y == 2) || (x ==2 && y ==1 )){
-//            robotData.firstStep = robot.getHeading();
-//        }
-//        robotData.squareSaver(exits);
-//        // Direction is returned
-//        return direction;
-//    }
 
     private int exploreControl(IRobot robot){
         int x = robot.getLocation().x;
         int y = robot.getLocation().y;
         int exits = nonwallExits(robot);
         int direction = 0;
-        if (nonwallExits(robot) > 2 && robotData.juncIdent(x, y) == 0) {
-            robotData.recordJunction(x, y, robot.getHeading());
-            robotData.recordKindOfJunction(exits);
-            robotData.print();
+        if (nonwallExits(robot) > 2) {
+            robotData.recordJunction(robot.getHeading());
             robotData.junctionCounter++;
         }
         if(pollRun == 0){
@@ -240,68 +71,10 @@ public class testEx2 {
             if ((robotData.kindOfSquare[robotData.squareCounter-1] == 3 || robotData.kindOfSquare[robotData.squareCounter-1] == 4) && robotData.getElem(0) == 0){
                 robotData.dirSaver(robotData.prevSquare(robot));
                 robotData.dirCounter++;
-                switch (exits) {
-                    // Deadend case
-                    case 1 -> {
-                        explorerMode = 0;
-                        direction = deadEnd(robot);
-                        robotData.dirRemover();
-                    }
-                    // Corridor case
-                    case 2 -> {
-                        direction = corridor(robot);
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                    // Junction case
-                    case 3 -> {
-                        direction = junction(robot);
-                        robotData.arrayCounter++;
-                        robotData.dirCounter = 0;
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                    // Crossroad case
-                    case 4 -> {
-                        direction = crossroad(robot);
-                        robotData.arrayCounter++;
-                        robotData.dirCounter = 0;
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                }
+                direction = exploringDirection(robot,exits);
 
             } else {
-                switch (exits) {
-                    // Deadend case
-                    case 1 -> {
-                        explorerMode = 0;
-                        direction = deadEnd(robot);
-                        robotData.dirRemover();
-                    }
-                    // Corridor case
-                    case 2 -> {
-                        direction = corridor(robot);
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                    // Junction case
-                    case 3 -> {
-                        direction = junction(robot);
-                        robotData.arrayCounter++;
-                        robotData.dirCounter = 0;
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                    // Crossroad case
-                    case 4 -> {
-                        direction = crossroad(robot);
-                        robotData.arrayCounter++;
-                        robotData.dirCounter = 0;
-                        robotData.dirSaver(direction);
-                        robotData.dirCounter++;
-                    }
-                }
+                direction = exploringDirection(robot,exits);
             }
         }
         if ((x ==1 && y == 2) || (x ==2 && y ==1 )){
@@ -311,6 +84,42 @@ public class testEx2 {
         // Direction is returned
         return direction;
     }
+
+    private int exploringDirection(IRobot robot, int exits){
+        int direction = 0;
+        switch (exits) {
+            // Deadend case
+            case 1 -> {
+                explorerMode = 0;
+                direction = deadEnd(robot);
+                robotData.dirRemover();
+            }
+            // Corridor case
+            case 2 -> {
+                direction = corridor(robot);
+                robotData.dirSaver(direction);
+                robotData.dirCounter++;
+            }
+            // Junction case
+            case 3 -> {
+                direction = junction(robot);
+                robotData.arrayCounter++;
+                robotData.dirCounter = 0;
+                robotData.dirSaver(direction);
+                robotData.dirCounter++;
+            }
+            // Crossroad case
+            case 4 -> {
+                direction = crossroad(robot);
+                robotData.arrayCounter++;
+                robotData.dirCounter = 0;
+                robotData.dirSaver(direction);
+                robotData.dirCounter++;
+            }
+        }
+        return direction;
+    }
+
 
 
     // This controller is called when robot is in backtracking mode
@@ -333,7 +142,7 @@ public class testEx2 {
                 }
                 // Robot goes to exploration mode
                 explorerMode = 1;
-                if (robotData.junctionCounter == 0){
+                if (robotData.directions[robotData.arrayCounter][0] != 0){
                     robotData.arrayCounter++;
                     robotData.dirCounter = 0;
                 } else {
@@ -376,6 +185,7 @@ public class testEx2 {
         // Direction is returned
         return direction;
     }
+
 
     //This method counts non-wall squares around robot
     public static int nonwallExits(IRobot robot){
@@ -521,16 +331,13 @@ public class testEx2 {
 class RobotData {
     private static int maxJunctions = 10000; // Max number likely to occur
     public static int junctionCounter = 0; // No. of junctions stored
-    private int[] juncX = new int[maxJunctions]; // X-coordinates of the junctions
-    private int[] juncY = new int[maxJunctions]; // Y-coordinates of the junctions
     private int[] arrived = new int[maxJunctions]; // Heading the robot first arrived from
     public int[] finalDir = new int[1000];
     public int[] kindOfSquare = new int [maxJunctions];
     public int[][] directions = new int[200][1000];
-    public int[] kindOfJunc = new int [maxJunctions];
     public int dirCounter = 0;
     public int squareCounter = 0;
-    public int counter2 = 0;
+    public int counter = 0;
     public int arrayCounter = 0;
     public int firstStep = 0;
 
@@ -540,36 +347,8 @@ class RobotData {
         junctionCounter = 0;
     }
 
-    public void recordJunction(int x, int y, int heading){
-        juncX[junctionCounter] = x;
-        juncY[junctionCounter] = y;
+    public void recordJunction(int heading){
         arrived[junctionCounter] = heading;
-    }
-
-    public int juncIdent(int x, int y){
-        int result = 0;
-        // Search for coordinates of junction. If it finds, this junction is already recorded
-        for (int i = 0; i < maxJunctions; i++){
-            if (x == juncX[i] && y == juncY[i]){
-                result = 1;
-                break;
-            }
-        }
-        return result;
-    }
-
-
-    // Prints junction's number, coordinates and heading
-    public void print(){
-        String[] headingArr = {"NORTH","SOUTH","EAST","WEST"};
-        String heading = "";
-        switch (arrived[junctionCounter]){
-            case IRobot.NORTH -> heading = headingArr[0];
-            case IRobot.SOUTH -> heading = headingArr[1];
-            case IRobot.EAST -> heading = headingArr[2];
-            case IRobot.WEST -> heading = headingArr[3];
-        }
-        System.out.println("Junction " + (junctionCounter+1) + " " + "heading " + heading);
     }
 
     // This method searches for heading of robot when it arrived at junction
@@ -600,12 +379,12 @@ class RobotData {
     }
 
     public void getDir(){
-        if (counter2 < 100) {
+        if (counter < 100) {
             for (int i = 0; i < 100; i++) {
                 for (int j = 0; j < 15; j++) {
                     if (directions[i][j] != 0) {
-                        finalDir[counter2] = directions[i][j];
-                        counter2++;
+                        finalDir[counter] = directions[i][j];
+                        counter++;
                     }
                 }
             }
@@ -626,25 +405,4 @@ class RobotData {
     public int getElem(int i){
         return directions[arrayCounter][i];
     }
-
-    public void recordKindOfJunction(int nonwalls){
-        if(nonwalls == 3){
-            kindOfJunc[junctionCounter] = 3;
-        } else if(nonwalls == 4){
-            kindOfJunc[junctionCounter] = 4;
-        }
-    }
-
-    public int searchJunction(int x, int y){
-        int index = 0;
-        for (int j = 0; j < juncX.length; j++) {
-            if (juncX[j] == x && juncY[j] == y) {
-                index = j;
-                break;
-            }
-        }
-        // Returns heading
-        return arrived[index];
-    }
-
 }
