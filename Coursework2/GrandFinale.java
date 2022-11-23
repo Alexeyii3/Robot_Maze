@@ -3,8 +3,12 @@ import uk.ac.warwick.dcs.maze.logic.IRobot;
 import java.util.Arrays;
 
 /*
-My code from exercise 2 works perfectly for exercise 3. I did not identify any collisions or crushes by testing this code a lor of times.
-BacktrackingControl and exploreControl identify paths correctly. Headings are saved and used correctly.
+    I can not say that I used one of the routes. By the way, I used data structures from route A (2D array) and one of ideas from route B: storing each heading.
+     However, my code usually stores directions. Headings are stored only when robot visits junctions. I would say that I implemented my own approach but used
+     some ideas from given routes. I used my own approach because I wanted to get familiar with new data structures and create something new on my own.
+     My tests did not show any crushes in Loopy Mazes, so I would say my code works for loopy mazes. However, I can not be sure that it works every time because
+     it is optimized for prime generator.
+     My code works for new mazes. It resets all needed variables and arrays. It is possible to run same maze as many times as you want.
  */
 public class GrandFinale {
     private int pollRun = 0; // Incremented after each pass
@@ -39,8 +43,8 @@ public class GrandFinale {
 
         // Robot uses stored directions for non-first runs
         if (robot.getRuns()>0){
-            if (pollRun == 0) {
-                robotData.getFinalDir(); // Creates 1D array with information from 2D array
+            if (robot.getRuns() == 1 && pollRun == 0) {
+                robotData.getFinalDir(); // Creates 1D array with information from 2D array on the second run and first pass
             }
             direction = robotData.finalDir[index]; // Gets direction for each run
             index++; // Counter is increased by 1
@@ -51,6 +55,7 @@ public class GrandFinale {
             }
         }
 
+        System.out.println("counter: " + robotData.counter);
         robot.face(direction);
         pollRun++; // Increases passes counter
     }
