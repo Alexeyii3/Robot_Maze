@@ -1,7 +1,5 @@
 import uk.ac.warwick.dcs.maze.logic.IRobot;
 
-import java.util.Arrays;
-
 /*
     I can not say that I used one of the routes. By the way, I used data structures from route A (2D array) and one of ideas from route B: storing each heading.
      However, my code usually stores directions. Headings are stored only when robot visits junctions. I would say that I implemented my own approach but used
