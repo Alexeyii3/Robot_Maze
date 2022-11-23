@@ -1,11 +1,12 @@
 import uk.ac.warwick.dcs.maze.logic.IRobot;
 
+import java.util.Arrays;
 
 /*
 My code from exercise 2 works perfectly for exercise 3. I did not identify any collisions or crushes by testing this code a lor of times.
 BacktrackingControl and exploreControl identify paths correctly. Headings are saved and used correctly.
  */
-public class testEx2 {
+public class GrandFinale {
     private int pollRun = 0; // Incremented after each pass
     private RobotData robotData; // Data store for junctions
     private int explorerMode; // Identifies which controller should be called
