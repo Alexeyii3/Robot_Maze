@@ -10,9 +10,10 @@ public class testEx2 {
     private int pollRun = 0; // Incremented after each pass
     private RobotData robotData; // Data store for junctions
     private int explorerMode; // Identifies which controller should be called
-    private int index = 0;
+    private int index = 0; // Index of array that contains directions robot uses for 2nd or further runs
 
     public void controlRobot(IRobot robot){
+        int direction = 0; // Variable will contain the direction robot faces
 
         // Resets RobotData information for new maze
         if ((robot.getRuns() == 0) && (pollRun == 0)) {
@@ -21,9 +22,7 @@ public class testEx2 {
             explorerMode = 1;
         }
 
-
-        int direction = 0;
-
+        // If it is a first run, robot explores the maze and saves information
         if (robot.getRuns() == 0) {
             // Calls needed controller
             switch (explorerMode) {
@@ -31,17 +30,23 @@ public class testEx2 {
                 case 1 -> direction = exploreControl(robot);
             }
         }
+
+        // Resets variables for new run
         if (pollRun == 0){
             index=0;
             explorerMode = 1;
         }
 
+        // Robot uses stored directions for non-first runs
         if (robot.getRuns()>0){
-            robotData.getDir();
-            direction = robotData.finalDir[index];
-            index++;
-            if (direction < 2000){
-                robot.setHeading(direction);
+            if (pollRun == 0) {
+                robotData.getFinalDir(); // Creates 1D array with information from 2D array
+            }
+            direction = robotData.finalDir[index]; // Gets direction for each run
+            index++; // Counter is increased by 1
+            // If value is not a direction, then it is a heading
+            if ((direction != IRobot.AHEAD) && (direction != IRobot.BEHIND) && (direction != IRobot.LEFT) && (direction != IRobot.RIGHT)){
+                robot.setHeading(direction); // Sets heading of robot
                 direction = IRobot.AHEAD;
             }
         }
@@ -51,38 +56,48 @@ public class testEx2 {
         pollRun++; // Increases passes counter
     }
 
-
+    // This controller is called when robot is in exploring mode
     private int exploreControl(IRobot robot){
         int x = robot.getLocation().x;
         int y = robot.getLocation().y;
         int exits = nonwallExits(robot);
         int direction = 0;
+
+        // If robot is at a junction, his heading is saved and counter of junctions is increased by 1
         if (nonwallExits(robot) > 2) {
             robotData.recordJunction(robot.getHeading());
             robotData.junctionCounter++;
         }
+
+        // On the first run robot does not save direction due to random heading. His heading on the nearest square will be saved
         if(pollRun == 0){
-            direction = deadEnd(robot);
-            robotData.dirSaver(direction);
+            switch (exits){
+                case 1 -> direction = deadEnd(robot);
+                case 2 -> direction = corridor(robot);
+            }
+            robotData.dirSaver(0);
             robotData.dirCounter++;
         } else {
+            // If robot  explored at least one of the paths of a junction, and it leads to a deadend, then particular heading is needed to be saved
             if ((robotData.kindOfSquare[robotData.squareCounter-1] == 3 || robotData.kindOfSquare[robotData.squareCounter-1] == 4) && robotData.getElem(0) == 0){
-                robotData.dirSaver(robot.getHeading());
+                robotData.dirSaver(robot.getHeading()); // Saves the heading
                 robotData.dirCounter++;
-                direction = exploringDirection(robot,exits);
-
-            } else {
+                direction = exploringDirection(robot,exits); // Gets the direction from exploringDirection
+            } else { // If robot did not go to deadend, information is saved as usual
                 direction = exploringDirection(robot,exits);
             }
         }
+        // If robot goes through squares that are next to start point, program saves heading the robot has
         if ((x ==1 && y == 2) || (x ==2 && y ==1 )){
             robotData.firstStep = robot.getHeading();
         }
+        // Saves kind of square where robot is (deadend, corridor, junction, crossroad)
         robotData.squareSaver(exits);
         // Direction is returned
         return direction;
     }
 
+    // This method chooses direction due to location of robot. It is implemented in exploreControl
     private int exploringDirection(IRobot robot, int exits){
         int direction = 0;
         switch (exits) {
@@ -90,35 +105,33 @@ public class testEx2 {
             case 1 -> {
                 explorerMode = 0;
                 direction = deadEnd(robot);
-                robotData.dirRemover();
+                robotData.dirRemover(); // Removes directions from sub-array if robot goes into deadend
             }
             // Corridor case
             case 2 -> {
                 direction = corridor(robot);
-                robotData.dirSaver(direction);
-                robotData.dirCounter++;
+                robotData.dirSaver(direction); // Saves direction of robot
+                robotData.dirCounter++; // Increases counter of directions
             }
             // Junction case
             case 3 -> {
                 direction = junction(robot);
-                robotData.arrayCounter++;
-                robotData.dirCounter = 0;
-                robotData.dirSaver(direction);
+                robotData.arrayCounter++; // Increases counter of sub-arrays
+                robotData.dirCounter = 0; // Make direction's counter 0, so information will be saved from the first element of sub-array
+                robotData.dirSaver(direction); // Saves direction of robot
                 robotData.dirCounter++;
             }
             // Crossroad case
             case 4 -> {
                 direction = crossroad(robot);
-                robotData.arrayCounter++;
-                robotData.dirCounter = 0;
-                robotData.dirSaver(direction);
-                robotData.dirCounter++;
+                robotData.arrayCounter++; // Increases counter of sub-arrays
+                robotData.dirCounter = 0; // Make direction's counter 0, so information will be saved from the first element of sub-array
+                robotData.dirSaver(direction); // Saves direction of robot
+                robotData.dirCounter++; // Increases counter of directions
             }
         }
         return direction;
     }
-
-
 
     // This controller is called when robot is in backtracking mode
     private int backtrackControl(IRobot robot){
@@ -140,6 +153,7 @@ public class testEx2 {
                 }
                 // Robot goes to exploration mode
                 explorerMode = 1;
+                // Controls that directions to the first junction will be written properly
                 if (robotData.directions[robotData.arrayCounter][0] != 0){
                     robotData.arrayCounter++;
                     robotData.dirCounter = 0;
@@ -148,7 +162,7 @@ public class testEx2 {
                 }
 
             } else {
-                int heading = robotData.searchHeading();
+                int heading = robotData.searchHeading(); // Takes heading when robot arrived to particular junction
                 // If there are no passages around, robot takes information about his heading when he arrived to this junction and then set opposite heading
                 switch (heading){
                     case IRobot.NORTH -> robot.setHeading(IRobot.SOUTH);
@@ -158,17 +172,22 @@ public class testEx2 {
                 }
                 // then robot moves ahead
                 direction = IRobot.AHEAD;
+
+                // When robot explored all paths from particular junction, and they all lead to deadends. In this case, directions to this
+                // junction are removed and robot goes back to previous junction.
                 robotData.arrayCounter--;
                 robotData.dirRemover();
                 robotData.removeElem();
             }
         } else {
+            // Controls robot while going through deadend or explored corridor
             if (passageExits(robot) == 0) {
                 switch (exits){
                     case 1 -> direction = deadEnd(robot);
                     case 2 -> direction = corridor(robot);
                 }
             } else {
+                // Saves directions if there are passages
                 direction = corridor(robot);
                 robotData.dirSaver(direction);
                 robotData.dirCounter++;
@@ -176,9 +195,12 @@ public class testEx2 {
             }
             // If it is not junction or crossroad, robot is controlled by "deadend" or "corridor" methods
         }
+
+        // If robot goes through squares that are next to start point, program saves heading the robot has
         if ((x ==1 && y == 2) || (x ==2 && y ==1 )){
             robotData.firstStep = robot.getHeading();
         }
+        // Saves kind of square where robot is (deadend, corridor, junction, crossroad)
         robotData.squareSaver(exits);
         // Direction is returned
         return direction;
@@ -190,7 +212,7 @@ public class testEx2 {
         int[] sides = {IRobot.AHEAD,IRobot.BEHIND,IRobot.LEFT,IRobot.RIGHT};
         int amount = 0;
         for (int i = 0; i < 4; i++){
-            if (robot.look(sides[i]) != IRobot.WALL){amount++;}
+            if (robot.look(sides[i]) != IRobot.WALL){amount++;} // Checks all sides and increases counter by 1 if there is no wall on the side
         }
         return amount;
     }
@@ -200,7 +222,7 @@ public class testEx2 {
         int[] sides = {IRobot.AHEAD,IRobot.LEFT,IRobot.RIGHT};
         int amount = 0;
         for (int i = 0; i < 3; i++){
-            if (robot.look(sides[i]) == IRobot.PASSAGE){
+            if (robot.look(sides[i]) == IRobot.PASSAGE){ // Checks all sides but behind and increases counter by 1 if there is a passage on the side
                 amount++;
             }
         }
@@ -330,14 +352,14 @@ class RobotData {
     private static int maxJunctions = 10000; // Max number likely to occur
     public static int junctionCounter = 0; // No. of junctions stored
     private int[] arrived = new int[maxJunctions]; // Heading the robot first arrived from
-    public int[] finalDir = new int[1000];
-    public int[] kindOfSquare = new int [maxJunctions];
-    public int[][] directions = new int[200][1000];
-    public int dirCounter = 0;
-    public int squareCounter = 0;
-    public int counter = 0;
-    public int arrayCounter = 0;
-    public int firstStep = 0;
+    public int[] finalDir = new int[1000]; // Final array of directions that are used on 2nd and further runs
+    public int[] kindOfSquare = new int [maxJunctions]; // Contains information about each square (either deadend, corridor, junction or crossroad)
+    public int[][] directions = new int[maxJunctions][1000]; // Array containing directions during the first run
+    public int arrayCounter = 0; // Counter of sub-arrays of "directions" array
+    public int dirCounter = 0; // Counter of directions for sub-arrays of "directions" array
+    public int squareCounter = 0; // Counter of squares robot visited
+    public int counter = 0; // Counter used when making finalDir
+    public int firstStep = 0; // This variable will contain heading of robot for the first step
 
 
     // Resets junctionCounter value
@@ -345,6 +367,7 @@ class RobotData {
         junctionCounter = 0;
     }
 
+    // Records robot's heading at the junction
     public void recordJunction(int heading){
         arrived[junctionCounter] = heading;
     }
@@ -356,30 +379,32 @@ class RobotData {
         return result;
     }
 
-    // This method removes element of array of robot's heading
-    public int removeElem(){
-        int result = 0;
-        junctionCounter--;
-        result = arrived[junctionCounter];
-        arrived[junctionCounter] = 0;
-        return result;
+    // This method removes element of array of robot's headings
+    public void removeElem(){
+        junctionCounter--; // Counter of junctions is decreased by 1
+        arrived[junctionCounter] = 0; // Heading of deleted junction is rewritten
     }
 
+    // Saves direction of robot
     public void dirSaver(int dir){
         directions[arrayCounter][dirCounter] = dir;
     }
 
+    // Removes all directions in sub-array
     public void dirRemover(){
         for(int i = 0; i < directions[arrayCounter].length; i++){
-            directions[arrayCounter][i] = 0;
+            directions[arrayCounter][i] = 0; //all directions in sub-array are changed to 0
         }
-        dirCounter = 0;
+        dirCounter = 0; // `Resets counter of directions
     }
 
-    public void getDir(){
-        if (counter < 100) {
-            for (int i = 0; i < 100; i++) {
-                for (int j = 0; j < 15; j++) {
+    // Creates 1D array of directions of robot
+    public void getFinalDir() {
+        finalDir[0] = firstStep; // Heading for first step of robot is saved in variable
+        counter++;
+        if (counter < 1000) {
+            for (int i = 0; i < maxJunctions; i++) {
+                for (int j = 0; j < 1000; j++) {
                     if (directions[i][j] != 0) {
                         finalDir[counter] = directions[i][j];
                         counter++;
@@ -387,7 +412,6 @@ class RobotData {
                 }
             }
         }
-        finalDir[0] = firstStep;
     }
     public void squareSaver(int square){
         kindOfSquare[squareCounter] = square;
